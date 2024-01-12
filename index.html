@@ -28,7 +28,8 @@
             function getVideoUrlFromHash() {
                 const hash = window.location.hash;
                 if (hash.startsWith('#video_')) {
-                    return hash.substring(7);
+                    // Decode the URL to handle special characters
+                    return decodeURIComponent(hash.substring(7));
                 }
                 return null;
             }
