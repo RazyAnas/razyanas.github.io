@@ -17,42 +17,53 @@
         </video>
     </div>
 
-    <!-- M3U8 input and play button -->
-    <input type="text" id="m3u8-placeholder" placeholder="Enter HLS URL">
-    <button id="play-btn">Play</button>
-
     <!-- Include plyr JS -->
     <script src="https://cdn.plyr.io/3.6.3/plyr.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        $(window).on('load', function () {
+        document.addEventListener('DOMContentLoaded', function () {
             // Initialize plyr video player
             const player = new Plyr('#my-video');
 
-            // Set the initial HLS URL from local storage
-            $('#m3u8-placeholder').val(localStorage.getItem('m3u8-link') || '');
+            // Function to extract video URL from hash
+            function getVideoUrlFromHash() {
+                const hash = window.location.hash;
+                if (hash.startsWith('#video_')) {
+                    return hash.substring(7);
+                }
+                return null;
+            }
 
-            // Click event for the play button
-            $('#play-btn').on('click', function () {
-                // Save HLS URL to local storage
-                const m3u8Link = $('#m3u8-placeholder').val();
-                localStorage.setItem('m3u8-link', m3u8Link);
+            // Function to initialize video player
+            function initializeVideoPlayer() {
+                const videoUrl = getVideoUrlFromHash();
 
-                // Update video source and play
-                player.source = {
-                    type: 'video',
-                    sources: [
-                        {
-                            src: m3u8Link,
-                            type: 'application/x-mpegURL',
-                        },
-                    ],
-                };
-                player.play();
+                if (videoUrl) {
+                    // Set the video source
+                    const videoSource = document.getElementById('video-source');
+                    videoSource.src = videoUrl;
 
-                // Update the URL hash
-                window.location.hash = '#video_' + m3u8Link;
-            });
+                    // Load the new source into the player
+                    player.source = {
+                        type: 'video',
+                        sources: [
+                            {
+                                src: videoUrl,
+                                type: 'application/x-mpegURL',
+                            },
+                        ],
+                    };
+
+                    // Auto-play the video
+                    player.play();
+                } else {
+                    // Display a message or redirect to home if no valid video URL is found
+                    alert('Invalid video URL.');
+                    window.location.href = './'; // Redirect to home or another page
+                }
+            }
+
+            // Call the initialization function
+            initializeVideoPlayer();
         });
     </script>
 </body>
