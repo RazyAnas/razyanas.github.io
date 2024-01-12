@@ -3,61 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Web - Video Player</title>
-    <!-- Include video.js CSS -->
-    <link href="https://vjs.zencdn.net/7.14.3/video-js.css" rel="stylesheet" />
+    <title>My Web - Advanced Video Player</title>
+    <!-- Include plyr CSS -->
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.3/plyr.css" />
 </head>
 <body>
     <!-- Video player container -->
-    <div id="video-container" class="video-container">
-        <video id="my-video" class="video-js vjs-big-play-centered" controls preload="auto" width="640" height="360">
+    <div id="video-container">
+        <video id="my-video" controls crossorigin>
             <!-- HLS video source -->
             <source id="video-source" src="" type="application/x-mpegURL">
             Your browser does not support the video tag.
         </video>
     </div>
 
-    <script src="https://vjs.zencdn.net/7.14.3/video.js"></script>
+    <!-- M3U8 input and play button -->
+    <input type="text" id="m3u8-placeholder" placeholder="Enter HLS URL">
+    <button id="play-btn">Play</button>
+
+    <!-- Include plyr JS -->
+    <script src="https://cdn.plyr.io/3.6.3/plyr.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        // Function to extract video URL from hash
-        function getVideoUrlFromHash() {
-            const hash = window.location.hash;
-            if (hash.startsWith('#video_')) {
-                return hash.substring(7);
-            }
-            return null;
-        }
+        $(window).on('load', function () {
+            // Initialize plyr video player
+            const player = new Plyr('#my-video');
 
-        // Function to initialize video player
-        function initializeVideoPlayer() {
-            const videoUrl = getVideoUrlFromHash();
+            // Set the initial HLS URL from local storage
+            $('#m3u8-placeholder').val(localStorage.getItem('m3u8-link') || '');
 
-            if (videoUrl) {
-                // Set the video source
-                const videoSource = document.getElementById('video-source');
-                videoSource.src = videoUrl;
+            // Click event for the play button
+            $('#play-btn').on('click', function () {
+                // Save HLS URL to local storage
+                const m3u8Link = $('#m3u8-placeholder').val();
+                localStorage.setItem('m3u8-link', m3u8Link);
 
-                // Initialize the video player
-                const player = videojs('my-video');
-                player.play(); // Start playing automatically
-
-                // Update the video URL if the hash changes
-                window.onhashchange = function () {
-                    const newVideoUrl = getVideoUrlFromHash();
-                    if (newVideoUrl && newVideoUrl !== videoUrl) {
-                        videoSource.src = newVideoUrl;
-                        player.src(videoSource.src);
-                        player.play();
-                    }
+                // Update video source and play
+                player.source = {
+                    type: 'video',
+                    sources: [
+                        {
+                            src: m3u8Link,
+                            type: 'application/x-mpegURL',
+                        },
+                    ],
                 };
-            } else {
-                // Display a message if no valid video URL is found
-                alert('Invalid video URL.');
-            }
-        }
+                player.play();
 
-        // Call the initialization function
-        initializeVideoPlayer();
+                // Update the URL hash
+                window.location.hash = '#video_' + m3u8Link;
+            });
+        });
     </script>
 </body>
 </html>
