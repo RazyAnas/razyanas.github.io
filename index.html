@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Web - Advanced Video Player</title>
+    <!-- Include plyr CSS -->
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.3/plyr.css" />
+</head>
+<body>
+    <!-- Video player container -->
+    <div id="video-container">
+        <video id="my-video" controls crossorigin>
+            <!-- HLS video source -->
+            <source id="video-source" src="" type="application/x-mpegURL">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <!-- Include plyr JS -->
+    <script src="https://cdn.plyr.io/3.6.3/plyr.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize plyr video player
+            const player = new Plyr('#my-video');
+
+            // Function to extract video URL from hash
+            function getVideoUrlFromHash() {
+                const hash = window.location.hash;
+                if (hash.startsWith('#video_')) {
+                    return hash.substring(7);
+                }
+                return null;
+            }
+
+            // Function to initialize video player
+            function initializeVideoPlayer() {
+                const videoUrl = getVideoUrlFromHash();
+
+                if (videoUrl) {
+                    // Set the video source
+                    const videoSource = document.getElementById('video-source');
+                    videoSource.src = videoUrl;
+                    
+                    // Load the new source into the player
+                    player.source = {
+                        type: 'video',
+                        sources: [
+                            {
+                                src: videoUrl,
+                                type: 'application/x-mpegURL',
+                            },
+                        ],
+                    };
+
+                    // Update the video URL if the hash changes
+                    window.onhashchange = function () {
+                        const newVideoUrl = getVideoUrlFromHash();
+                        if (newVideoUrl && newVideoUrl !== videoUrl) {
+                            videoSource.src = newVideoUrl;
+                            player.source = {
+                                type: 'video',
+                                sources: [
+                                    {
+                                        src: newVideoUrl,
+                                        type: 'application/x-mpegURL',
+                                    },
+                                ],
+                            };
+                        }
+                    };
+                } else {
+                    // Display a message if no valid video URL is found
+                    alert('Invalid video URL.');
+                }
+            }
+
+            // Call the initialization function
+            initializeVideoPlayer();
+        });
+    </script>
+</body>
+</html>
